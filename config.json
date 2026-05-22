@@ -1,0 +1,224 @@
+{
+  "app": {
+    "name": "SpeakAI",
+    "defaultLanguageId": "en-US",
+    "defaultModeId": "conversation",
+    "defaultVoiceId": "JBFqnCBsd6RMkjVDRZzb",
+    "defaultThemeId": "studio",
+    "defaultDifficultyId": "beginner",
+    "defaultAssistantName": "Ari"
+  },
+  "providers": {
+    "openai": {
+      "baseUrl": "https://api.openai.com/v1",
+      "transcriptionModel": "gpt-4o-mini-transcribe",
+      "conversationModel": "gpt-5-mini",
+      "grammarModel": "gpt-5-mini",
+      "summaryModel": "gpt-5-mini",
+      "conversationTemperature": 0.7
+    },
+    "elevenlabs": {
+      "baseUrl": "https://api.elevenlabs.io/v1",
+      "modelId": "eleven_multilingual_v2",
+      "outputFormat": "mp3_44100_128",
+      "voiceSettings": {
+        "stability": 0.45,
+        "similarity_boost": 0.75,
+        "style": 0.25,
+        "use_speaker_boost": true
+      }
+    }
+  },
+  "prompts": {
+    "speechBaseEnglish": "You are {{assistantName}}, a spoken language tutor AI. Always reply in the same language used by the user. Keep responses natural, clear, and encouraging. Ask follow-up questions to keep the conversation alive.",
+    "grammarCompanionEnglish": "You are {{assistantName}}. Talk with the user and keep the conversation going.",
+    "talkSummaryEnglish": "Create a short summary of this conversation in up to 5 lines. Focus on user goals, frequent mistakes, requested adjustments, and preferences that help future conversations."
+  },
+  "languages": [
+    {
+      "id": "en-US",
+      "label": "English (US)",
+      "iso6391": "en"
+    },
+    {
+      "id": "pt-BR",
+      "label": "Português (Brasil)",
+      "iso6391": "pt"
+    },
+    {
+      "id": "es-ES",
+      "label": "Español (Espanha)",
+      "iso6391": "es"
+    },
+    {
+      "id": "fr-FR",
+      "label": "Français (France)",
+      "iso6391": "fr"
+    },
+    {
+      "id": "de-DE",
+      "label": "Deutsch (Deutschland)",
+      "iso6391": "de"
+    },
+    {
+      "id": "it-IT",
+      "label": "Italiano (Italia)",
+      "iso6391": "it"
+    }
+  ],
+  "voices": [
+    {
+      "id": "JBFqnCBsd6RMkjVDRZzb",
+      "label": "Rachel",
+      "languageIds": [
+        "en-US"
+      ]
+    },
+    {
+      "id": "IKne3meq5aSn9XLyUdCD",
+      "label": "Charlie",
+      "languageIds": [
+        "en-US"
+      ]
+    },
+    {
+      "id": "EXAVITQu4vr4xnSDxMaL",
+      "label": "Matilda",
+      "languageIds": [
+        "pt-BR",
+        "es-ES",
+        "fr-FR",
+        "de-DE",
+        "it-IT"
+      ]
+    }
+  ],
+  "modes": [
+    {
+      "id": "conversation",
+      "label": "Conversação"
+    },
+    {
+      "id": "conversation_with_correction",
+      "label": "Conversação + Correção Paralela"
+    }
+  ],
+  "difficultyLevels": [
+    {
+      "id": "beginner",
+      "label": "Iniciante",
+      "promptHint": "Use simple vocabulary, short sentences, and a friendly pace."
+    },
+    {
+      "id": "intermediate",
+      "label": "Intermediário",
+      "promptHint": "Use mixed sentence lengths, occasional idioms, and moderate complexity."
+    },
+    {
+      "id": "advanced",
+      "label": "Avançado",
+      "promptHint": "Use rich vocabulary, nuanced phrasing, and deeper topics."
+    }
+  ],
+  "correction": {
+    "enabledModeIds": [
+      "conversation_with_correction"
+    ],
+    "engine": "local_heuristic",
+    "localRules": {
+      "collapseSpaces": true,
+      "capitalizeFirstLetter": true,
+      "ensureEndingPunctuation": true,
+      "commonReplacementsByLanguage": {
+        "en-US": {
+          "dont": "don't",
+          "cant": "can't",
+          "im": "I'm",
+          "i": "I"
+        },
+        "pt-BR": {
+          "vc": "você",
+          "tb": "também",
+          "pq": "porque"
+        },
+        "es-ES": {
+          "q": "que",
+          "xq": "porque"
+        }
+      }
+    }
+  },
+  "translation": {
+    "enabled": true,
+    "library": "@vitalets/google-translate-api",
+    "defaultEnabled": false,
+    "defaultTargetLanguageId": "pt-BR"
+  },
+  "memory": {
+    "folder": "ai_memory",
+    "talkPrefix": "talk_"
+  },
+  "ui": {
+    "assistantVoiceEnabled": true,
+    "autoPlayAssistantAudio": true,
+    "recordingMimeType": "audio/webm",
+    "autoSendTranscription": true,
+    "maxHistoryMessages": 30
+  },
+  "themes": {
+    "defaultThemeId": "studio",
+    "options": [
+      {
+        "id": "studio",
+        "label": "Studio",
+        "tokens": {
+          "--bg":             "#f4f5f7",
+          "--surface":        "#ffffff",
+          "--surface-soft":   "#f9fafb",
+          "--surface-strong": "#f0f1f5",
+          "--text-main":      "#111827",
+          "--text-soft":      "#6b7280",
+          "--accent":         "#6366f1",
+          "--accent-strong":  "#4f46e5",
+          "--border":         "#e5e7eb",
+          "--ok":             "#10b981",
+          "--warn":           "#f59e0b"
+        }
+      },
+      {
+        "id": "night",
+        "label": "Night",
+        "tokens": {
+          "--bg":             "#0d1117",
+          "--surface":        "#161b22",
+          "--surface-soft":   "#0d1117",
+          "--surface-strong": "#1c2128",
+          "--text-main":      "#e6edf3",
+          "--text-soft":      "#848d97",
+          "--accent":         "#818cf8",
+          "--accent-strong":  "#6366f1",
+          "--border":         "#30363d",
+          "--ok":             "#3fb950",
+          "--warn":           "#d29922"
+        }
+      },
+      {
+        "id": "forest",
+        "label": "Forest",
+        "tokens": {
+          "--bg":             "#f0faf4",
+          "--surface":        "#ffffff",
+          "--surface-soft":   "#f4fbf7",
+          "--surface-strong": "#e6f4ec",
+          "--text-main":      "#14322a",
+          "--text-soft":      "#4d7a62",
+          "--accent":         "#16a34a",
+          "--accent-strong":  "#15803d",
+          "--border":         "#d1e9db",
+          "--ok":             "#16a34a",
+          "--warn":           "#ca8a04"
+        }
+      }
+    ]
+  }
+}

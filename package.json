@@ -1,0 +1,23 @@
+{
+  "name": "speakai",
+  "version": "0.1.0",
+  "description": "SpeakAI language training desktop app built with Electron",
+  "main": "src/main.js",
+  "author": "Leonardo Martins",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "cmd /C \"set ELECTRON_RUN_AS_NODE=&& electron .\"",
+    "dev": "cmd /C \"set ELECTRON_RUN_AS_NODE=&& electron .\""
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@vitalets/google-translate-api": "^9.2.1",
+    "dotenv": "^17.2.2"
+  },
+  "devDependencies": {
+    "electron": "^36.3.2"
+  }
+}
