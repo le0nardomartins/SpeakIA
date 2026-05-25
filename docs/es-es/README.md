@@ -34,7 +34,7 @@
 
 ## ¿Qué es SpeakAI?
 
-SpeakAI es una aplicación de escritorio construida con Electron que te pone en una conversación real con una IA que habla, escucha y corrige tu gramática — todo en el idioma que estás aprendiendo. Combina tres APIs (OpenAI y ElevenLabs) en una experiencia integrada:
+SpeakAI es una aplicación de escritorio construida con Electron que te pone en una conversación real con una IA que habla, escucha y corrige tu gramática, todo en el idioma que estás aprendiendo. Combina tres APIs (OpenAI y ElevenLabs) en una experiencia integrada:
 
 | Modo | Qué hace |
 |---|---|
@@ -48,16 +48,16 @@ SpeakAI es una aplicación de escritorio construida con Electron que te pone en 
 
 - **30 idiomas** de entrenamiento (inglés, portugués, español, francés, alemán, italiano, japonés, chino y más)
 - **Panel de corrección gramatical** que funciona en paralelo en cada mensaje
-- **Efecto de escritura** — el texto de la IA aparece palabra a palabra, como si estuviera escribiendo en tiempo real
-- **Tarjeta de corrección** en cada burbuja del usuario — muestra la versión corregida con notas explicativas
-- **Botón de traducción inline** en cada mensaje de la IA — clic para revelar, otro clic para ocultar
-- **Historial de conversaciones** — accede a resúmenes de sesiones anteriores desde el encabezado del panel
-- **Memoria de conversaciones** — las sesiones anteriores se resumen y reutilizan como contexto para la IA
+- **Efecto de escritura**, el texto de la IA aparece palabra a palabra, como si estuviera escribiendo en tiempo real
+- **Tarjeta de corrección** en cada burbuja del usuario, muestra la versión corregida con notas explicativas
+- **Botón de traducción inline** en cada mensaje de la IA, clic para revelar, otro clic para ocultar
+- **Historial de conversaciones**, accede a resúmenes de sesiones anteriores desde el encabezado del panel
+- **Memoria de conversaciones**, las sesiones anteriores se resumen y reutilizan como contexto para la IA
 - **Reproductor de audio personalizado** con barra de progreso, control de tiempo y botón de silencio
-- **3 temas visuales** — Studio, Night, Forest — con vista previa en tiempo real
-- **Detección del idioma del SO** — el idioma de la interfaz se configura automáticamente al primer inicio
+- **3 temas visuales**, Studio, Night, Forest, con vista previa en tiempo real
+- **Detección del idioma del SO**, el idioma de la interfaz se configura automáticamente al primer inicio
 - **Barra lateral contraíble** con estado persistido entre sesiones
-- **Claves de API desde la GUI** — con indicador de estado y aviso antes de sobrescribir claves existentes
+- **Claves de API desde la GUI**, con indicador de estado y aviso antes de sobrescribir claves existentes
 
 ---
 
@@ -77,7 +77,7 @@ copy .env.example .env
 npm run start
 ```
 
-> **Acceso directo en Windows:** haz doble clic en `start_speakai.bat` — instala e inicia automáticamente.
+> **Acceso directo en Windows:** haz doble clic en `start_speakai.bat`, instala e inicia automáticamente.
 >
 > También puedes configurar las claves directamente desde la pestaña **Opciones** dentro de la aplicación, sin tocar el `.env`.
 
@@ -90,7 +90,7 @@ SpeakAI/
 │
 ├── src/                          # Proceso principal de Electron (Node.js)
 │   ├── main.js                   # Bootstrap, BrowserWindow, manejadores IPC
-│   ├── preload.js                # Puente de contexto — expone speakAI.* al renderer
+│   ├── preload.js                # Puente de contexto, expone speakAI.* al renderer
 │   ├── config/
 │   │   └── config-store.js       # Lee y valida config.json
 │   ├── clients/
@@ -103,7 +103,7 @@ SpeakAI/
 │       └── local-grammar-engine.js  # Corrector gramatical local sin API
 │
 ├── GUI/                          # Proceso renderer (HTML + Vanilla JS, sin bundler)
-│   ├── index.html                # Shell de la app — carga scripts en orden correcto
+│   ├── index.html                # Shell de la app, carga scripts en orden correcto
 │   ├── renderer.js               # Punto de entrada: bindEvents() + init()
 │   ├── core/
 │   │   ├── app-state.js          # Objeto de estado global, caché DOM, constantes
@@ -128,7 +128,7 @@ SpeakAI/
 ├── assets/                       # Logos e iconos
 ├── ai_memory/                    # Resúmenes de conversaciones (talk_N.txt)
 ├── config.json                   # Config central: prompts, modelos, idiomas, temas, voces
-├── .env                          # Claves de API — nunca incluir en commits
+├── .env                          # Claves de API, nunca incluir en commits
 ├── .env.example                  # Plantilla del .env
 ├── package.json
 └── start_speakai.bat             # Bootstrap Windows con un clic
@@ -138,14 +138,14 @@ SpeakAI/
 
 ## Configuración (`config.json`)
 
-Todo el comportamiento funcional se controla desde `config.json` — sin necesidad de modificar código:
+Todo el comportamiento funcional se controla desde `config.json`, sin necesidad de modificar código:
 
 | Sección | Qué controla |
 |---|---|
 | `app` | Nombre predeterminado de la IA, idioma, voz, tema y dificultad |
 | `languages` | Los 30 idiomas de entrenamiento (BCP-47, label, código ISO 639-1) |
 | `difficultyLevels` | Principiante / Intermedio / Avanzado |
-| `themes` | Studio / Night / Forest — cada uno con tokens CSS completos |
+| `themes` | Studio / Night / Forest, cada uno con tokens CSS completos |
 | `voices` | Voces de ElevenLabs con mapeo de idiomas compatibles |
 | `prompts` | Instrucciones base del LLM para modo texto y modo voz |
 | `translation` | Habilitado por defecto, idioma objetivo predeterminado |
@@ -155,7 +155,7 @@ Todo el comportamiento funcional se controla desde `config.json` — sin necesid
 
 ## Orden de Carga de Scripts (GUI)
 
-El renderer no usa bundler — los scripts comparten el ámbito global y deben cargarse en este orden exacto:
+El renderer no usa bundler, los scripts comparten el ámbito global y deben cargarse en este orden exacto:
 
 ```
 i18n/translations.js        →  objeto TRANSLATIONS (cadenas para 6 idiomas)

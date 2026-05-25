@@ -34,7 +34,7 @@
 
 ## What is SpeakAI?
 
-SpeakAI is an Electron desktop app that puts you in a real conversation with an AI that speaks, listens, and corrects your grammar — all in the language you are learning. It combines three OpenAI/ElevenLabs APIs into a single seamless experience:
+SpeakAI is an Electron desktop app that puts you in a real conversation with an AI that speaks, listens, and corrects your grammar, all in the language you are learning. It combines three OpenAI/ElevenLabs APIs into a single seamless experience:
 
 | Mode | What it does |
 |---|---|
@@ -49,12 +49,12 @@ SpeakAI is an Electron desktop app that puts you in a real conversation with an 
 - **30 languages** for training (English, Portuguese, Spanish, French, German, Italian, Japanese, Chinese, and more)
 - **Grammar correction** panel that runs in parallel on every message
 - **Typing indicator** with animated dots while the AI thinks
-- **Inline translate button** on every AI message — click to reveal, click again to hide
-- **Conversation memory** — past conversations are summarized and reused as context
-- **3 visual themes** — Studio, Night, Forest — with live preview
-- **OS language detection** — app UI language auto-set on first run
+- **Inline translate button** on every AI message, click to reveal, click again to hide
+- **Conversation memory**, past conversations are summarized and reused as context
+- **3 visual themes**, Studio, Night, Forest, with live preview
+- **OS language detection**, app UI language auto-set on first run
 - **Collapsible sidebar** with state persisted across sessions
-- **API keys via GUI** — no need to edit `.env` manually
+- **API keys via GUI**, no need to edit `.env` manually
 
 ---
 
@@ -74,7 +74,7 @@ copy .env.example .env
 npm run start
 ```
 
-> **Windows shortcut:** double-click `start_speakai.bat` — it installs and launches automatically.
+> **Windows shortcut:** double-click `start_speakai.bat`, it installs and launches automatically.
 >
 > You can also set API keys directly in the **Options** tab inside the app, without touching `.env`.
 
@@ -87,7 +87,7 @@ SpeakAI/
 │
 ├── src/                          # Electron main process (Node.js)
 │   ├── main.js                   # App bootstrap, BrowserWindow, IPC handlers
-│   ├── preload.js                # Context bridge — exposes speakAI.* to renderer
+│   ├── preload.js                # Context bridge, exposes speakAI.* to renderer
 │   ├── config/
 │   │   └── config-loader.js      # Reads and validates config.json
 │   ├── clients/
@@ -98,7 +98,7 @@ SpeakAI/
 │       └── memory-manager.js     # Reads/writes ai_memory/talk_N.txt files
 │
 ├── GUI/                          # Renderer process (HTML + Vanilla JS, no bundler)
-│   ├── index.html                # App shell — loads scripts in dependency order
+│   ├── index.html                # App shell, loads scripts in dependency order
 │   ├── renderer.js               # Entry point: bindEvents() + init()
 │   ├── core/
 │   │   ├── app-state.js          # Global state object, DOM cache, storage keys
@@ -119,7 +119,7 @@ SpeakAI/
 ├── assets/                       # Logos and icons
 ├── ai_memory/                    # Auto-generated conversation summaries (talk_N.txt)
 ├── config.json                   # Central config: prompts, models, languages, themes, voices
-├── .env                          # API keys — never commit this file
+├── .env                          # API keys, never commit this file
 ├── .env.example                  # Template for .env
 ├── package.json
 └── start_speakai.bat             # Windows one-click bootstrap
@@ -129,14 +129,14 @@ SpeakAI/
 
 ## Configuration (`config.json`)
 
-All functional behavior is controlled from `config.json` — no code changes needed:
+All functional behavior is controlled from `config.json`, no code changes needed:
 
 | Section | What it controls |
 |---|---|
 | `app` | Default assistant name, language, voice, theme, difficulty |
 | `languages` | All 30 training languages (BCP-47 id, label, ISO 639-1 code) |
 | `difficultyLevels` | Beginner / Intermediate / Advanced |
-| `themes` | Studio / Night / Forest — each with a full set of CSS tokens |
+| `themes` | Studio / Night / Forest, each with a full set of CSS tokens |
 | `voices` | ElevenLabs voices with supported language mappings |
 | `prompts` | Base LLM instructions for text mode and speech mode |
 | `translation` | Enable by default, default target language |
@@ -146,7 +146,7 @@ All functional behavior is controlled from `config.json` — no code changes nee
 
 ## GUI Script Loading Order
 
-The renderer uses no bundler — scripts share global scope and must load in this exact order:
+The renderer uses no bundler, scripts share global scope and must load in this exact order:
 
 ```
 i18n/translations.js        →  TRANSLATIONS object (strings for 6 languages)
