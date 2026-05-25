@@ -2,8 +2,6 @@
   <img src="assets/without_background/logo_sem_fundo.png" alt="SpeakAI logo" width="220" />
 </p>
 
-<h1 align="center">SpeakAI</h1>
-
 <p align="center">
   Desktop app for language learning through real AI conversation.
 </p>
