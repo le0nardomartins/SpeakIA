@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/without_background/logo_sem_fundo.png" alt="SpeakAI logo" width="220" />
+  <img src="../../assets/without_background/logo_sem_fundo.png" alt="SpeakAI logo" width="220" />
 </p>
 
 <h1 align="center">SpeakAI</h1>
@@ -21,16 +21,20 @@
   🌐 &nbsp;
   <a href="README.md"><img src="https://flagcdn.com/20x15/us.png" alt="en-US" /> English</a>
   &nbsp;|&nbsp;
-  <a href="docs/pt-br/README.md"><img src="https://flagcdn.com/20x15/br.png" alt="pt-BR" /> Português</a>
+  <a href="../pt-br/README.md"><img src="https://flagcdn.com/20x15/br.png" alt="pt-BR" /> Português</a>
   &nbsp;|&nbsp;
-  <a href="docs/es-es/README.md"><img src="https://flagcdn.com/20x15/es.png" alt="es-ES" /> Español</a>
+  <a href="../es-es/README.md"><img src="https://flagcdn.com/20x15/es.png" alt="es-ES" /> Español</a>
+</p>
+
+<p align="center">
+  <a href="TECHNICAL.md">Technical Reference</a>
 </p>
 
 ---
 
 ## What is SpeakAI?
 
-SpeakAI is an Electron desktop app that puts you in a real conversation with an AI that speaks, listens, and corrects your grammar, all in the language you are learning. It combines three OpenAI/ElevenLabs APIs into a single seamless experience:
+SpeakAI is an Electron desktop app that puts you in a real conversation with an AI that speaks, listens, and corrects your grammar — all in the language you are learning. It combines three OpenAI/ElevenLabs APIs into a single seamless experience:
 
 | Mode | What it does |
 |---|---|
@@ -64,7 +68,7 @@ npm install
 
 # 2. Configure API keys
 copy .env.example .env
-# Then edit .env and fill in OPENAI_API_KEY and ELEVENLABS_API_KEY
+# Edit .env and fill in OPENAI_API_KEY and ELEVENLABS_API_KEY
 
 # 3. Launch
 npm run start
@@ -109,12 +113,8 @@ SpeakAI/
 │   └── main.css                  # Design tokens (CSS vars), themes, layout, components
 │
 ├── docs/
-│   ├── en-us/README.md           # English documentation
-│   ├── en-us/TECHNICAL.md        # English technical reference
-│   ├── pt-br/README.md           # Portuguese documentation
-│   ├── pt-br/TECHNICAL.md        # Portuguese technical reference
-│   ├── es-es/README.md           # Spanish documentation
-│   └── es-es/TECHNICAL.md        # Spanish technical reference
+│   ├── pt-BR/README.md           # Portuguese documentation
+│   └── en-US/README.md           # This file
 │
 ├── assets/                       # Logos and icons
 ├── ai_memory/                    # Auto-generated conversation summaries (talk_N.txt)
@@ -149,12 +149,43 @@ All functional behavior is controlled from `config.json` — no code changes nee
 The renderer uses no bundler — scripts share global scope and must load in this exact order:
 
 ```
-i18n/translations.js   →  TRANSLATIONS object (strings for 6 languages)
-core/app-state.js      →  state, elements, storage key constants
-core/ui-utils.js       →  setStatus, setBusy, showToast, tr(), applyUiLanguage
+i18n/translations.js        →  TRANSLATIONS object (strings for 6 languages)
+core/app-state.js           →  state, elements, storage key constants
+core/ui-utils.js            →  setStatus, setBusy, showToast, tr(), applyUiLanguage
 modules/options-manager.js  →  config validation, options form, selects, chips
 modules/chat-session.js     →  chat messages, typing indicator, recording, session turns
-renderer.js            →  bindEvents(), init()  ← entry point, loaded last
+renderer.js                 →  bindEvents(), init()  ← entry point, loaded last
+```
+
+---
+
+## Text Interaction Flow
+
+```
+User types → textSendButton.click
+  → runSessionTurn()
+    → inserts message + typing indicator
+    → window.speakAI.processTurn() [IPC]
+      → session-manager.js → openai-client.js (LLM)
+    → returns assistantText + correction
+  → addChatMessage() displays reply with translate button
+  → renderCorrectionBox() displays grammar feedback
+```
+
+---
+
+## Speech Interaction Flow
+
+```
+speechRecordButton.click
+  → handleSpeechRecordingToggle()
+    → getUserMedia() → MediaRecorder starts
+  → [2nd click] MediaRecorder stops
+    → audio blob → arrayBuffer
+    → window.speakAI.transcribeAudio() [IPC → Whisper]
+    → transcript → runSessionTurn() (same as text flow)
+      → backend generates audio via ElevenLabs
+      → speechAudioPlayer.play() auto-plays response
 ```
 
 ---

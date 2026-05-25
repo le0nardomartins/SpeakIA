@@ -30,66 +30,61 @@
     }
   },
   "prompts": {
-    "speechBaseEnglish": "You are {{assistantName}}, a spoken language tutor AI. Always reply in the same language used by the user. Keep responses natural, clear, and encouraging. Ask follow-up questions to keep the conversation alive.",
-    "grammarCompanionEnglish": "You are {{assistantName}}. Talk with the user and keep the conversation going.",
+    "speechBaseEnglish": "You are {{assistantName}}, a friendly conversation partner. Have a natural, engaging conversation with the user. CRITICAL RULES — follow these exactly:\n1. You MUST respond EXCLUSIVELY in the training language specified below. Never switch to another language, never mention another language, never offer language options.\n2. Keep replies concise and conversational. Ask one follow-up question to keep the chat alive.\n3. Do NOT mention grammar, correction, language practice modes, or anything meta about learning. Grammar is checked silently in the background — never acknowledge or discuss it.\n4. Behave like a native speaker having a casual friendly chat on any topic the user brings up.\n5. NEVER use hyphens (-), em dashes (—), en dashes (–), or any kind of dash character in your responses. NEVER use emojis of any kind. Write in plain sentences only.",
+    "grammarCompanionEnglish": "You are {{assistantName}}. Have a natural conversation with the user.",
     "talkSummaryEnglish": "Create a short summary of this conversation in up to 5 lines. Focus on user goals, frequent mistakes, requested adjustments, and preferences that help future conversations."
   },
   "languages": [
-    {
-      "id": "en-US",
-      "label": "English (US)",
-      "iso6391": "en"
-    },
-    {
-      "id": "pt-BR",
-      "label": "Português (Brasil)",
-      "iso6391": "pt"
-    },
-    {
-      "id": "es-ES",
-      "label": "Español (Espanha)",
-      "iso6391": "es"
-    },
-    {
-      "id": "fr-FR",
-      "label": "Français (France)",
-      "iso6391": "fr"
-    },
-    {
-      "id": "de-DE",
-      "label": "Deutsch (Deutschland)",
-      "iso6391": "de"
-    },
-    {
-      "id": "it-IT",
-      "label": "Italiano (Italia)",
-      "iso6391": "it"
-    }
+    { "id": "en-US", "label": "English (US)",              "iso6391": "en" },
+    { "id": "en-GB", "label": "English (UK)",              "iso6391": "en" },
+    { "id": "pt-BR", "label": "Português (Brasil)",        "iso6391": "pt" },
+    { "id": "pt-PT", "label": "Português (Portugal)",      "iso6391": "pt" },
+    { "id": "es-ES", "label": "Español (España)",          "iso6391": "es" },
+    { "id": "es-MX", "label": "Español (México)",          "iso6391": "es" },
+    { "id": "fr-FR", "label": "Français (France)",         "iso6391": "fr" },
+    { "id": "de-DE", "label": "Deutsch (Deutschland)",     "iso6391": "de" },
+    { "id": "it-IT", "label": "Italiano (Italia)",         "iso6391": "it" },
+    { "id": "nl-NL", "label": "Nederlands (Países Baixos)","iso6391": "nl" },
+    { "id": "pl-PL", "label": "Polski (Polônia)",          "iso6391": "pl" },
+    { "id": "sv-SE", "label": "Svenska (Suécia)",          "iso6391": "sv" },
+    { "id": "da-DK", "label": "Dansk (Dinamarca)",         "iso6391": "da" },
+    { "id": "no-NO", "label": "Norsk (Noruega)",           "iso6391": "no" },
+    { "id": "fi-FI", "label": "Suomi (Finlândia)",         "iso6391": "fi" },
+    { "id": "cs-CZ", "label": "Čeština (Rep. Tcheca)",     "iso6391": "cs" },
+    { "id": "ro-RO", "label": "Română (Romênia)",          "iso6391": "ro" },
+    { "id": "el-GR", "label": "Ελληνικά (Grécia)",         "iso6391": "el" },
+    { "id": "ru-RU", "label": "Русский (Rússia)",          "iso6391": "ru" },
+    { "id": "uk-UA", "label": "Українська (Ucrânia)",      "iso6391": "uk" },
+    { "id": "tr-TR", "label": "Türkçe (Turquia)",          "iso6391": "tr" },
+    { "id": "ar-SA", "label": "العربية (Árabe)",           "iso6391": "ar" },
+    { "id": "he-IL", "label": "עברית (Israel)",            "iso6391": "he" },
+    { "id": "hi-IN", "label": "हिन्दी (Índia)",              "iso6391": "hi" },
+    { "id": "ja-JP", "label": "日本語 (Japão)",             "iso6391": "ja" },
+    { "id": "ko-KR", "label": "한국어 (Coreia)",            "iso6391": "ko" },
+    { "id": "zh-CN", "label": "中文 (China)",               "iso6391": "zh" },
+    { "id": "th-TH", "label": "ภาษาไทย (Tailândia)",       "iso6391": "th" },
+    { "id": "vi-VN", "label": "Tiếng Việt (Vietnã)",       "iso6391": "vi" },
+    { "id": "id-ID", "label": "Bahasa Indonesia",          "iso6391": "id" }
   ],
   "voices": [
     {
       "id": "JBFqnCBsd6RMkjVDRZzb",
       "label": "Rachel",
-      "languageIds": [
-        "en-US"
-      ]
+      "languageIds": ["en-US", "en-GB"]
     },
     {
       "id": "IKne3meq5aSn9XLyUdCD",
       "label": "Charlie",
-      "languageIds": [
-        "en-US"
-      ]
+      "languageIds": ["en-US", "en-GB"]
     },
     {
       "id": "EXAVITQu4vr4xnSDxMaL",
       "label": "Matilda",
       "languageIds": [
-        "pt-BR",
-        "es-ES",
-        "fr-FR",
-        "de-DE",
-        "it-IT"
+        "pt-BR", "pt-PT", "es-ES", "es-MX", "fr-FR", "de-DE", "it-IT",
+        "nl-NL", "pl-PL", "sv-SE", "da-DK", "no-NO", "fi-FI", "cs-CZ",
+        "ro-RO", "el-GR", "ru-RU", "uk-UA", "tr-TR", "ar-SA", "he-IL",
+        "hi-IN", "ja-JP", "ko-KR", "zh-CN", "th-TH", "vi-VN", "id-ID"
       ]
     }
   ],

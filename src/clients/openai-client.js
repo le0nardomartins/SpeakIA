@@ -85,29 +85,80 @@ function buildBaseSpeechInstructions({
   const sections = [promptWithName];
 
   if (trainingLanguageLabel) {
-    sections.push(`Current training language for this interaction: ${trainingLanguageLabel}.`);
+    sections.push(`TRAINING LANGUAGE FOR THIS SESSION: ${trainingLanguageLabel}. You MUST respond only in this language. Do not use, mention, or offer any other language.`);
   }
 
   if (nativeLanguageLabel) {
-    sections.push(`User native language preference: ${nativeLanguageLabel}.`);
-  }
-
-  if (alwaysTrainingLanguageLabels) {
-    sections.push(`Always-practiced languages set by user: ${alwaysTrainingLanguageLabels}.`);
+    sections.push(`User's native language (for your context only, do NOT use it to respond): ${nativeLanguageLabel}.`);
   }
 
   if (difficultyHint) {
-    sections.push(`Current learner level guidance: ${difficultyHint}`);
+    sections.push(`Learner level: ${difficultyHint}`);
   }
 
   if (memoryContext) {
     sections.push(
-      "Context from previous conversations. Use this only as supportive memory:\n"
+      "Context from previous conversations (use only as background memory):\n"
       + memoryContext
     );
   }
 
+  const nativeLang = nativeLanguageLabel || "the user's native language";
+  sections.push(
+    `RESPONSE FORMAT — you MUST reply with a single valid JSON object and nothing else outside it:\n`
+    + `{\n`
+    + `  "reply": "<your conversational response in the training language>",\n`
+    + `  "correction": {\n`
+    + `    "original": "<the user's exact text>",\n`
+    + `    "corrected": "<grammatically and orthographically correct version>",\n`
+    + `    "notes": ["<brief explanation of each correction written in ${nativeLang}>"]\n`
+    + `  }\n`
+    + `}\n`
+    + `If the user's text has NO grammar, spelling, or punctuation errors, use "correction": null.\n`
+    + `Do NOT include markdown fences, comments, or any text outside the JSON object.`
+  );
+
   return sections.join("\n\n");
+}
+
+// Parses the JSON response from the LLM — robust to code fences and minor formatting issues.
+// Falls back to treating the entire text as the reply if JSON cannot be extracted.
+function parseAssistantResponse(rawText) {
+  const text = String(rawText || "").trim();
+
+  const tryParse = (str) => {
+    try {
+      const parsed = JSON.parse(str);
+      if (typeof parsed?.reply === "string" && parsed.reply.trim()) {
+        return {
+          reply:      parsed.reply.trim(),
+          correction: parsed.correction && typeof parsed.correction === "object" ? parsed.correction : null
+        };
+      }
+    } catch {}
+    return null;
+  };
+
+  // 1. Direct parse
+  const direct = tryParse(text);
+  if (direct) { return direct; }
+
+  // 2. Strip markdown code fences
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) {
+    const fromFence = tryParse(fenceMatch[1].trim());
+    if (fromFence) { return fromFence; }
+  }
+
+  // 3. Grab first {...} block that contains "reply"
+  const objMatch = text.match(/\{[\s\S]*?"reply"[\s\S]*?\}/);
+  if (objMatch) {
+    const fromObj = tryParse(objMatch[0]);
+    if (fromObj) { return fromObj; }
+  }
+
+  // 4. Fallback — treat raw text as the reply, no correction
+  return { reply: text, correction: null };
 }
 
 function getOpenAiApiKey(config) {
@@ -118,8 +169,7 @@ async function callResponsesApi({
   config,
   model,
   instructions,
-  input,
-  temperature
+  input
 }) {
   const openai = config.providers.openai;
   const apiKey = getOpenAiApiKey(config);
@@ -131,10 +181,6 @@ async function callResponsesApi({
     input,
     store: false
   };
-
-  if (typeof temperature === "number") {
-    payload.temperature = temperature;
-  }
 
   const response = await fetch(`${baseUrl}/responses`, {
     method: "POST",
@@ -210,6 +256,7 @@ async function transcribeAudio({
   return text;
 }
 
+// Returns { reply: string, correction: object|null }
 async function generateAssistantReply({
   config,
   history,
@@ -236,13 +283,14 @@ async function generateAssistantReply({
     ? `${transcript}\nUser: ${userText}\nAssistant:`
     : `User: ${userText}\nAssistant:`;
 
-  return callResponsesApi({
+  const rawText = await callResponsesApi({
     config,
     model: String(openai.conversationModel || "gpt-5-mini"),
     instructions,
-    input,
-    temperature: openai.conversationTemperature
+    input
   });
+
+  return parseAssistantResponse(rawText);
 }
 
 async function generateGrammarWithLlm({
@@ -257,8 +305,7 @@ async function generateGrammarWithLlm({
     config,
     model: String(openai.grammarModel || openai.conversationModel || "gpt-5-mini"),
     instructions,
-    input: text,
-    temperature: 0.6
+    input: text
   });
 
   return result.trim();
@@ -282,8 +329,7 @@ async function generateTalkSummary({
     config,
     model: String(openai.summaryModel || openai.conversationModel || "gpt-5-mini"),
     instructions,
-    input: transcript,
-    temperature: 0.3
+    input: transcript
   });
 }
 

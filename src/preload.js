@@ -8,5 +8,7 @@ contextBridge.exposeInMainWorld("speakAI", {
   getMemorySnapshot: () => ipcRenderer.invoke("speakai:get-memory-snapshot"),
   finalizeConversation: (payload) => ipcRenderer.invoke("speakai:finalize-conversation", payload),
   getApiSettings: () => ipcRenderer.invoke("speakai:get-api-settings"),
-  saveApiSettings: (payload) => ipcRenderer.invoke("speakai:save-api-settings", payload)
+  saveApiSettings: (payload) => ipcRenderer.invoke("speakai:save-api-settings", payload),
+  translateText: (payload) => ipcRenderer.invoke("speakai:translate-text", payload),
+  listConversations: () => ipcRenderer.invoke("speakai:list-conversations")
 });

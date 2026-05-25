@@ -1,4 +1,4 @@
-const { generateAssistantReply, generateGrammarWithLlm } = require("../clients/openai-client");
+const { generateAssistantReply } = require("../clients/openai-client");
 const { synthesizeSpeech } = require("../clients/elevenlabs-client");
 const { runLocalCorrection } = require("./local-grammar-engine");
 const { translateText } = require("../clients/translation-client");
@@ -21,39 +21,6 @@ function labelsFromLanguageIds(config, languageIds) {
   return labels.join(", ");
 }
 
-function shouldGenerateCorrection(config, modeId) {
-  const enabledModes = config.correction?.enabledModeIds || [];
-  return enabledModes.includes(modeId);
-}
-
-async function generateCorrection({
-  config,
-  languageId,
-  text,
-  assistantName
-}) {
-  const engine = String(config.correction?.engine || "local_heuristic");
-
-  if (engine === "llm") {
-    const parallelCoachText = await generateGrammarWithLlm({
-      config,
-      text,
-      assistantName
-    });
-    return {
-      original: text,
-      corrected: parallelCoachText,
-      changed: parallelCoachText !== text,
-      notes: ["Coach paralelo gerado por LLM."]
-    };
-  }
-
-  return runLocalCorrection({
-    text,
-    languageId,
-    rules: config.correction?.localRules || {}
-  });
-}
 
 function trimHistory(history, maxItems) {
   const safeHistory = Array.isArray(history) ? history : [];
@@ -103,97 +70,74 @@ function buildSpeechDiagnostics({
 }
 
 async function processTurn({ config, payload }) {
-  const language = findLanguage(config, payload.languageId);
+  const language               = findLanguage(config, payload.languageId);
   const targetTranslationLanguage = findLanguage(config, payload.translationTargetLanguageId);
-  const nativeLanguage = findLanguage(config, payload.nativeLanguageId);
-  const difficulty = findDifficulty(config, payload.difficultyId);
-  const modeId = payload.modeId || config.app.defaultModeId;
-  const history = trimHistory(payload.history, config.ui?.maxHistoryMessages);
-  const userText = String(payload.text || "").trim();
-  const assistantName = String(payload.assistantName || config.app.defaultAssistantName || config.app.name || "SpeakAI");
-  const memoryContext = String(payload.memoryContext || "").trim();
-  const sessionType = String(payload.sessionType || "text");
-  const alwaysTrainingLanguageLabels = labelsFromLanguageIds(
-    config,
-    payload.alwaysTrainingLanguageIds
-  );
+  const nativeLanguage         = findLanguage(config, payload.nativeLanguageId);
+  const difficulty             = findDifficulty(config, payload.difficultyId);
+  const history                = trimHistory(payload.history, config.ui?.maxHistoryMessages);
+  const userText               = String(payload.text || "").trim();
+  const assistantName          = String(payload.assistantName || config.app.defaultAssistantName || config.app.name || "SpeakAI");
+  const memoryContext          = String(payload.memoryContext || "").trim();
+  const sessionType            = String(payload.sessionType || "text");
+  const alwaysTrainingLanguageLabels = labelsFromLanguageIds(config, payload.alwaysTrainingLanguageIds);
 
-  if (!userText) {
-    throw new Error("User text is empty");
-  }
+  if (!userText) { throw new Error("User text is empty"); }
 
-  const assistantPromise = generateAssistantReply({
+  // Single LLM call returns both the reply and grammar correction in JSON
+  const { reply: assistantText, correction: rawCorrection } = await generateAssistantReply({
     config,
     history,
     userText,
     assistantName,
-    difficultyHint: difficulty?.promptHint || "",
+    difficultyHint:        difficulty?.promptHint || "",
     memoryContext,
     trainingLanguageLabel: language?.label || "",
-    nativeLanguageLabel: nativeLanguage?.label || "",
+    nativeLanguageLabel:   nativeLanguage?.label || "",
     alwaysTrainingLanguageLabels
   });
 
-  const correctionPromise = shouldGenerateCorrection(config, modeId)
-    ? generateCorrection({
-        config,
-        languageId: language.id,
-        text: userText,
-        assistantName
-      })
-    : Promise.resolve(null);
-
-  const [assistantText, correction] = await Promise.all([
-    assistantPromise,
-    correctionPromise
-  ]);
+  // Normalize: add 'changed' flag so downstream code can check if text was modified
+  const correction = rawCorrection && typeof rawCorrection === "object"
+    ? { ...rawCorrection, changed: rawCorrection.original !== rawCorrection.corrected }
+    : null;
 
   const translatedAssistantText = await maybeTranslate({
     config,
-    text: assistantText,
-    translationEnabled: Boolean(payload.translateAssistantReply),
+    text:                  assistantText,
+    translationEnabled:    Boolean(payload.translateAssistantReply),
     targetLanguageIso6391: targetTranslationLanguage?.iso6391
   });
 
   let speechDiagnostics = null;
   if (sessionType === "speech") {
     const speechCorrection = correction || runLocalCorrection({
-      text: userText,
-      languageId: language.id,
-      rules: config.correction?.localRules || {}
+      text: userText, languageId: language.id, rules: config.correction?.localRules || {}
     });
-
     const translatedUserText = await maybeTranslate({
       config,
-      text: userText,
-      translationEnabled: Boolean(payload.translateUserSpeechToNative),
+      text:                  userText,
+      translationEnabled:    Boolean(payload.translateUserSpeechToNative),
       targetLanguageIso6391: nativeLanguage?.iso6391
     });
-
-    speechDiagnostics = buildSpeechDiagnostics({
-      userText,
-      correction: speechCorrection,
-      translatedUserText
-    });
+    speechDiagnostics = buildSpeechDiagnostics({ userText, correction: speechCorrection, translatedUserText });
   }
 
+  // TTS is non-fatal: quota errors or network issues must not crash the whole turn
   let audioDataUrl = null;
   if (config.ui?.assistantVoiceEnabled && payload.voiceId) {
-    audioDataUrl = await synthesizeSpeech({
-      config,
-      text: assistantText,
-      voiceId: payload.voiceId,
-      languageIso6391: language.iso6391
-    });
+    try {
+      audioDataUrl = await synthesizeSpeech({
+        config,
+        text:            assistantText,
+        voiceId:         payload.voiceId,
+        languageIso6391: language.iso6391
+      });
+    } catch (error) {
+      console.error(`TTS synthesis skipped: ${error.message}`);
+    }
   }
 
-  return {
-    assistantText,
-    translatedAssistantText,
-    correction,
-    audioDataUrl,
-    speechDiagnostics
-  };
+  return { assistantText, translatedAssistantText, correction, audioDataUrl, speechDiagnostics };
 }
 
 module.exports = {

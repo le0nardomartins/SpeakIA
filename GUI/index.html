@@ -20,7 +20,7 @@
           <div class="sidebar-brand">
             <img src="../assets/without_background/logo_sem_fundo.png" alt="SpeakAI" class="sidebar-brand-logo" />
           </div>
-          <button id="sidebarToggleButton" class="icon-action ghost" type="button" title="Recolher menu lateral" aria-label="Recolher menu lateral">
+          <button id="sidebarToggleButton" class="icon-action ghost" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
           </button>
         </div>
@@ -30,19 +30,19 @@
             <span class="nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5" /></svg>
             </span>
-            <span class="nav-label">Treino Gramatical</span>
+            <span class="nav-label" data-i18n="navGrammar">Treino Gramatical</span>
           </button>
           <button class="nav-btn" data-tab="speech" type="button">
             <span class="nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3zm-5 9a5 5 0 0 0 10 0M12 17v4M9 21h6" /></svg>
             </span>
-            <span class="nav-label">Conversa por Fala</span>
+            <span class="nav-label" data-i18n="navSpeech">Conversação</span>
           </button>
           <button class="nav-btn" data-tab="options" type="button">
             <span class="nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </span>
-            <span class="nav-label">Opções</span>
+            <span class="nav-label" data-i18n="navOptions">Opções</span>
           </button>
         </nav>
 
@@ -55,32 +55,35 @@
       <main class="workspace">
         <section id="tab-text" class="tab-panel is-active">
           <div class="panel-header">
-            <h2>Treino Gramatical (Texto)</h2>
+            <h2 data-i18n="panelGrammar">Treino Gramatical (Texto)</h2>
             <div class="panel-header-actions">
-              <button id="textNewConversationButton" class="icon-action" type="button" title="Nova conversa de texto" aria-label="Nova conversa de texto">
+              <button id="textHistoryButton" class="icon-action" type="button" title="Histórico de conversas">
+                <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+              </button>
+              <button id="textNewConversationButton" class="icon-action" type="button">
                 <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
               </button>
             </div>
           </div>
           <div class="panel-controls">
             <label class="field">
-              <span>Idioma desta interação (obrigatório)</span>
+              <span data-i18n="labelInteractionLang">Idioma desta interação (obrigatório)</span>
               <select id="textInteractionLanguageSelect"></select>
             </label>
             <label class="field">
-              <span>Dificuldade</span>
+              <span data-i18n="labelDifficulty">Dificuldade</span>
               <select id="textDifficultySelect"></select>
             </label>
           </div>
           <div id="textChatMessages" class="chat-messages"></div>
           <div class="composer">
             <div class="composer-box">
-              <textarea id="textInput" rows="1" placeholder="Digite aqui..."></textarea>
-              <button id="textSendButton" class="composer-send-btn" type="button" title="Enviar (Enter)" aria-label="Enviar mensagem de texto">
+              <textarea id="textInput" rows="1" data-i18n-ph="composerPlaceholder" placeholder="Digite aqui..."></textarea>
+              <button id="textSendButton" class="composer-send-btn" type="button">
                 <svg viewBox="0 0 24 24"><path d="M3 11.5L21 3l-8.5 18-2.2-7.3zM10.3 13.7l10.7-10.7" /></svg>
               </button>
             </div>
-            <p class="composer-hint">Enter para enviar · Shift+Enter para nova linha</p>
+            <p class="composer-hint" data-i18n="composerHint">Enter para enviar · Shift+Enter para nova linha</p>
           </div>
           <div id="textCorrectionBox" class="coach-box">
             <p class="placeholder">Correções e observações vão aparecer aqui.</p>
@@ -89,37 +92,58 @@
 
         <section id="tab-speech" class="tab-panel">
           <div class="panel-header">
-            <h2>Conversa por Fala</h2>
+            <h2 data-i18n="panelSpeech">Conversação</h2>
             <div class="panel-header-actions">
-              <button id="speechNewConversationButton" class="icon-action" type="button" title="Nova conversa por fala" aria-label="Nova conversa por fala">
+              <button id="speechHistoryButton" class="icon-action" type="button" title="Histórico de conversas">
+                <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+              </button>
+              <button id="speechNewConversationButton" class="icon-action" type="button">
                 <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
               </button>
             </div>
           </div>
           <div class="panel-controls">
             <label class="field">
-              <span>Idioma desta interação (obrigatório)</span>
+              <span data-i18n="labelInteractionLang">Idioma desta interação (obrigatório)</span>
               <select id="speechInteractionLanguageSelect"></select>
             </label>
             <label class="field">
-              <span>Dificuldade</span>
+              <span data-i18n="labelDifficulty">Dificuldade</span>
               <select id="speechDifficultySelect"></select>
             </label>
             <label class="field">
-              <span>Voz da IA</span>
+              <span data-i18n="labelVoice">Voz da IA</span>
               <select id="speechVoiceSelect"></select>
             </label>
           </div>
           <div id="speechChatMessages" class="chat-messages"></div>
           <div class="speech-record-area">
-            <button id="speechRecordButton" class="speech-record-btn" type="button" title="Gravar áudio" aria-label="Gravar áudio">
+            <button id="speechRecordButton" class="speech-record-btn" type="button">
               <svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3zm-5 9a5 5 0 0 0 10 0M12 17v4M9 21h6" /></svg>
             </button>
-            <span id="speechRecordLabel" class="speech-record-label">Pressione para gravar</span>
+            <span id="speechRecordLabel" class="speech-record-label" data-i18n="recordPress">Pressione para gravar</span>
           </div>
           <textarea id="speechTextFallbackInput" style="display:none"></textarea>
           <button id="speechSendTextButton" style="display:none" type="button"></button>
-          <audio id="speechAudioPlayer" controls></audio>
+          <audio id="speechAudioPlayer"></audio>
+          <div class="cap-player" id="capPlayer">
+            <button class="cap-btn cap-play-btn" id="capPlayBtn" type="button" disabled>
+              <svg class="cap-icon-play" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg class="cap-icon-pause" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>
+            <div class="cap-timeline">
+              <div class="cap-bar-track">
+                <div class="cap-bar-fill" id="capBarFill"></div>
+                <input type="range" class="cap-seek" id="capSeek" min="0" max="100" step="0.1" value="0" />
+              </div>
+            </div>
+            <span class="cap-times">
+              <span id="capCurrentTime">0:00</span><span class="cap-divider"> / </span><span id="capDuration">--:--</span>
+            </span>
+            <button class="cap-btn cap-vol-btn" id="capVolumeBtn" type="button" title="Silenciar">
+              <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            </button>
+          </div>
           <div id="speechFeedbackBox" class="coach-box">
             <p class="placeholder">Feedback de fala será exibido aqui.</p>
           </div>
@@ -127,14 +151,14 @@
 
         <section id="tab-options" class="tab-panel tab-options">
           <div class="panel-header">
-            <h2>Opções</h2>
+            <h2 data-i18n="panelOptions">Opções</h2>
             <div class="panel-header-actions">
-              <button id="reloadConfigButton" class="icon-action ghost" type="button" title="Recarregar configurações" aria-label="Recarregar configurações">
+              <button id="reloadConfigButton" class="icon-action ghost" type="button">
                 <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v6h-6" /></svg>
               </button>
-              <button id="saveOptionsButton" class="icon-pill primary" type="button" title="Salvar opções" aria-label="Salvar opções">
+              <button id="saveOptionsButton" class="icon-pill primary" type="button">
                 <svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5zM8 3v6h8V3M8 21v-6h8v6" /></svg>
-                <span>Salvar</span>
+                <span data-i18n="btnSave">Salvar</span>
               </button>
             </div>
           </div>
@@ -142,88 +166,100 @@
           <div class="options-layout">
 
             <div class="options-card">
-              <p class="options-card-title">Chaves de API</p>
+              <p class="options-card-title" data-i18n="cardApiKeys">Chaves de API</p>
               <div class="options-row options-row-keys">
                 <label class="field compact">
-                  <span>OpenAI API Key</span>
-                  <input id="openaiApiKeyInput" type="password" placeholder="Cole a chave da OpenAI" />
+                  <span data-i18n="labelOpenaiKey">OpenAI API Key</span>
+                  <input id="openaiApiKeyInput" type="password" placeholder="sk-..." />
+                  <span class="api-key-status" id="openaiKeyStatus" hidden>
+                    <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Chave configurada
+                  </span>
                 </label>
                 <label class="field compact">
-                  <span>ElevenLabs API Key</span>
-                  <input id="elevenlabsApiKeyInput" type="password" placeholder="Cole a chave da ElevenLabs" />
+                  <span data-i18n="labelElevenlabsKey">ElevenLabs API Key</span>
+                  <input id="elevenlabsApiKeyInput" type="password" placeholder="..." />
+                  <span class="api-key-status" id="elevenlabsKeyStatus" hidden>
+                    <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Chave configurada
+                  </span>
                 </label>
                 <button id="saveApiKeysButton" class="icon-pill secondary" type="button">
                   <svg viewBox="0 0 24 24"><path d="M5 12l4 4L19 6" /></svg>
-                  <span>Salvar chaves</span>
+                  <span data-i18n="btnSaveKeys">Salvar chaves</span>
                 </button>
               </div>
             </div>
 
             <div class="options-card">
-              <p class="options-card-title">Preferências</p>
+              <p class="options-card-title" data-i18n="cardPreferences">Preferências</p>
               <div class="options-row">
                 <label class="field compact">
-                  <span>Nome da IA</span>
+                  <span data-i18n="labelAssistantName">Nome da IA</span>
                   <input id="assistantNameInput" type="text" maxlength="40" />
                 </label>
                 <label class="field compact">
-                  <span>Idioma nativo</span>
+                  <span data-i18n="labelNativeLang">Idioma nativo</span>
                   <select id="nativeLanguageSelect"></select>
                 </label>
                 <label class="field compact">
-                  <span>Tema</span>
+                  <span data-i18n="labelAppLang">Idioma do app</span>
+                  <select id="appLanguageSelect"></select>
+                </label>
+                <label class="field compact">
+                  <span data-i18n="labelTheme">Tema</span>
                   <select id="themeSelect"></select>
                 </label>
                 <label class="field compact">
-                  <span>Dificuldade padrão</span>
+                  <span data-i18n="labelDefaultDifficulty">Dificuldade padrão</span>
                   <select id="optionsDifficultySelect"></select>
                 </label>
               </div>
             </div>
 
             <div class="options-card">
-              <p class="options-card-title">Idiomas</p>
+              <p class="options-card-title" data-i18n="cardLanguages">Idiomas</p>
               <div class="options-row options-row-languages">
                 <div class="field compact language-field">
-                  <span>Idiomas treinados</span>
+                  <span data-i18n="labelTrainingLangs">Idiomas treinados</span>
                   <div class="language-picker">
                     <div id="alwaysTrainingLanguageChips" class="language-chip-list"></div>
                     <div class="language-add">
                       <select id="addTrainingLanguageSelect"></select>
-                      <button id="addTrainingLanguageButton" class="icon-action" type="button" title="Adicionar idioma" aria-label="Adicionar idioma">
+                      <button id="addTrainingLanguageButton" class="icon-action" type="button">
                         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
                       </button>
                     </div>
                   </div>
                 </div>
                 <label class="field compact">
-                  <span>Idioma alvo da tradução</span>
+                  <span data-i18n="labelTranslationTarget">Idioma alvo da tradução</span>
                   <select id="translationTargetLanguageSelect"></select>
                 </label>
               </div>
             </div>
 
             <div class="options-card">
-              <p class="options-card-title">Exibição e tradução</p>
+              <p class="options-card-title" data-i18n="cardDisplay">Exibição e tradução</p>
               <div class="options-row options-row-switches">
                 <label class="field field-switch compact">
-                  <span>Traduzir resposta da IA</span>
+                  <span data-i18n="labelTranslateAssistant">Traduzir resposta da IA</span>
                   <input id="translateAssistantToggle" type="checkbox" />
                 </label>
                 <label class="field field-switch compact">
-                  <span>Mostrar entendimento da fala</span>
+                  <span data-i18n="labelShowUnderstood">Mostrar entendimento da fala</span>
                   <input id="showSpeechUnderstoodToggle" type="checkbox" />
                 </label>
                 <label class="field field-switch compact">
-                  <span>Mostrar correção da fala</span>
+                  <span data-i18n="labelShowCorrectness">Mostrar correção da fala</span>
                   <input id="showSpeechCorrectnessToggle" type="checkbox" />
                 </label>
                 <label class="field field-switch compact">
-                  <span>Traduzir fala do usuário</span>
+                  <span data-i18n="labelTranslateUserSpeech">Traduzir fala do usuário</span>
                   <input id="translateUserSpeechToggle" type="checkbox" />
                 </label>
                 <label class="field field-switch compact">
-                  <span>Mostrar tradução da fala</span>
+                  <span data-i18n="labelShowTranslation">Mostrar tradução da fala</span>
                   <input id="showSpeechUserTranslationToggle" type="checkbox" />
                 </label>
               </div>
@@ -243,16 +279,51 @@
         <div class="modal-icon">
           <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <h3 id="modalTitle" class="modal-title">Alterações não salvas</h3>
-        <p class="modal-body">Você tem alterações nas opções que ainda não foram salvas. O que deseja fazer?</p>
+        <h3 id="modalTitle" class="modal-title" data-i18n="modalTitle">Alterações não salvas</h3>
+        <p class="modal-body" data-i18n="modalBody">Você tem alterações nas opções que ainda não foram salvas. O que deseja fazer?</p>
         <div class="modal-actions">
-          <button id="modalSaveSwitch" class="modal-btn modal-btn-primary" type="button">Salvar e sair</button>
-          <button id="modalDiscardSwitch" class="modal-btn modal-btn-secondary" type="button">Sair sem salvar</button>
-          <button id="modalCancel" class="modal-btn modal-btn-ghost" type="button">Cancelar</button>
+          <button id="modalSaveSwitch" class="modal-btn modal-btn-primary" data-i18n="modalSaveSwitch" type="button">Salvar e sair</button>
+          <button id="modalDiscardSwitch" class="modal-btn modal-btn-secondary" data-i18n="modalDiscard" type="button">Sair sem salvar</button>
+          <button id="modalCancel" class="modal-btn modal-btn-ghost" data-i18n="modalCancel" type="button">Cancelar</button>
         </div>
       </div>
     </div>
 
+    <!-- History modal -->
+    <div id="historyModal" class="modal-overlay" hidden>
+      <div class="modal-card history-modal-card" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+        <div class="history-modal-header">
+          <h3 id="historyModalTitle" class="modal-title">Histórico de Conversas</h3>
+          <button id="historyModalClose" class="icon-action ghost" type="button">
+            <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="history-modal-list" id="historyModalList">
+          <p class="history-empty">Carregando...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- API key overwrite confirmation modal -->
+    <div id="apiKeyOverwriteModal" class="modal-overlay" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true">
+        <div class="modal-icon" style="background:#fee2e2;border-color:#fca5a5;color:#b91c1c;">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <h3 class="modal-title">Substituir chaves existentes?</h3>
+        <p class="modal-body">Você já possui chaves de API configuradas. Ao continuar, elas serão substituídas pelas novas chaves informadas.</p>
+        <div class="modal-actions">
+          <button id="apiKeyOverwriteConfirm" class="modal-btn modal-btn-primary" type="button">Sim, substituir</button>
+          <button id="apiKeyOverwriteCancel" class="modal-btn modal-btn-ghost" type="button">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./i18n/translations.js"></script>
+    <script src="./core/app-state.js"></script>
+    <script src="./core/ui-utils.js"></script>
+    <script src="./modules/options-manager.js"></script>
+    <script src="./modules/chat-session.js"></script>
     <script src="./renderer.js"></script>
   </body>
 </html>
