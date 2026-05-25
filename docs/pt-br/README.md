@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../../assets/without_background/logo_sem_fundo.png" alt="SpeakAI logo" width="220" />
+  <img src="../../assets/without_background/logo_sem_fundo_darkMode.png" alt="SpeakAI logo" width="220" />
 </p>
 
 <h1 align="center">SpeakAI</h1>

@@ -21,6 +21,33 @@ function labelsFromLanguageIds(config, languageIds) {
   return labels.join(", ");
 }
 
+function resolveVoiceId(config, languageId, preferredVoiceId) {
+  const voices = Array.isArray(config?.voices) ? config.voices : [];
+  if (voices.length === 0) {
+    return "";
+  }
+
+  const preferred = String(preferredVoiceId || "").trim();
+  if (preferred && voices.some((voice) => voice.id === preferred)) {
+    return preferred;
+  }
+
+  const languageMatch = voices.find((voice) => {
+    const ids = Array.isArray(voice.languageIds) ? voice.languageIds : [];
+    return Boolean(languageId) && ids.includes(languageId);
+  });
+  if (languageMatch?.id) {
+    return String(languageMatch.id);
+  }
+
+  const defaultVoiceId = String(config?.app?.defaultVoiceId || "").trim();
+  if (defaultVoiceId && voices.some((voice) => voice.id === defaultVoiceId)) {
+    return defaultVoiceId;
+  }
+
+  return String(voices[0]?.id || "");
+}
+
 
 function trimHistory(history, maxItems) {
   const safeHistory = Array.isArray(history) ? history : [];
@@ -69,6 +96,59 @@ function buildSpeechDiagnostics({
   };
 }
 
+function sanitizeCorrectionText(text) {
+  const raw = String(text || "").trim();
+  if (!raw) {
+    return "";
+  }
+  if (!/(?:^|\s)(?:User|Assistant)\s*:/i.test(raw)) {
+    return raw;
+  }
+
+  return raw
+    .replace(/\b(?:User|Assistant)\s*:/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isRoleLabelArtifactNote(note) {
+  const normalized = String(note || "").toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  if (/\buser\s*:|\bassistant\s*:/.test(normalized)) {
+    return true;
+  }
+
+  const mentionsRole = /\buser\b|\bassistant\b/.test(normalized);
+  const mentionsPrefix = /\bprefix\b|\bprefixo\b|\brotulo\b|\btag\b|\bmarcador\b/.test(normalized);
+  return mentionsRole && mentionsPrefix;
+}
+
+function normalizeLlmCorrection(rawCorrection, userText) {
+  if (!rawCorrection || typeof rawCorrection !== "object") {
+    return null;
+  }
+
+  const original = String(userText || "").trim();
+  const correctedCandidate = sanitizeCorrectionText(rawCorrection.corrected);
+  const corrected = correctedCandidate || original;
+  const notes = Array.isArray(rawCorrection.notes)
+    ? rawCorrection.notes
+      .map((item) => String(item || "").trim())
+      .filter(Boolean)
+      .filter((note) => !isRoleLabelArtifactNote(note))
+    : [];
+
+  return {
+    original,
+    corrected,
+    notes,
+    changed: original !== corrected
+  };
+}
+
 async function processTurn({ config, payload }) {
   const language               = findLanguage(config, payload.languageId);
   const targetTranslationLanguage = findLanguage(config, payload.translationTargetLanguageId);
@@ -96,10 +176,8 @@ async function processTurn({ config, payload }) {
     alwaysTrainingLanguageLabels
   });
 
-  // Normalize: add 'changed' flag so downstream code can check if text was modified
-  const correction = rawCorrection && typeof rawCorrection === "object"
-    ? { ...rawCorrection, changed: rawCorrection.original !== rawCorrection.corrected }
-    : null;
+  // Normalize: lock "original" to the actual user text and sanitize role labels from model output.
+  const correction = normalizeLlmCorrection(rawCorrection, userText);
 
   const translatedAssistantText = await maybeTranslate({
     config,
@@ -124,12 +202,13 @@ async function processTurn({ config, payload }) {
 
   // TTS is non-fatal: quota errors or network issues must not crash the whole turn
   let audioDataUrl = null;
-  if (config.ui?.assistantVoiceEnabled && payload.voiceId) {
+  const voiceId = resolveVoiceId(config, language?.id, payload.voiceId);
+  if (config.ui?.assistantVoiceEnabled && voiceId) {
     try {
       audioDataUrl = await synthesizeSpeech({
         config,
         text:            assistantText,
-        voiceId:         payload.voiceId,
+        voiceId,
         languageIso6391: language.iso6391
       });
     } catch (error) {

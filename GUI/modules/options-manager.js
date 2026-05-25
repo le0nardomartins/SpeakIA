@@ -40,6 +40,9 @@ function getLanguageById(languageId) {
     || state.config.languages[0];
 }
 
+const SIDEBAR_LOGO_LIGHT_SRC = "../assets/without_background/logo_sem_fundo.png";
+const SIDEBAR_LOGO_DARK_SRC  = "../assets/without_background/logo_sem_fundo_darkMode.png";
+
 // Aplica os tokens CSS do tema selecionado no :root do documento
 function applyTheme(themeId) {
   const theme = state.config.themes.options.find((item) => item.id === themeId)
@@ -49,6 +52,11 @@ function applyTheme(themeId) {
   Object.entries(theme.tokens).forEach(([token, value]) => {
     document.documentElement.style.setProperty(token, value);
   });
+  document.documentElement.setAttribute("data-theme-id", theme.id);
+
+  if (elements.sidebarBrandLogo) {
+    elements.sidebarBrandLogo.src = theme.id === "night" ? SIDEBAR_LOGO_DARK_SRC : SIDEBAR_LOGO_LIGHT_SRC;
+  }
 }
 
 // ─── Opções padrão e normalização ────────────────────────────────────────────
@@ -72,6 +80,7 @@ function getDefaultOptionsFromConfig() {
     showSpeechCorrectness:       true,
     translateUserSpeechToNative: true,
     showSpeechUserTranslation:   true,
+    debugMode:                   false,
     askTrainingLanguagePerInteraction: true
   };
 }
@@ -97,9 +106,10 @@ function normalizeOptions(raw) {
     translationTargetLanguageId: hasLanguage(source.translationTargetLanguageId) ? source.translationTargetLanguageId : defaults.translationTargetLanguageId,
     translateAssistantReply:     Boolean(source.translateAssistantReply     ?? defaults.translateAssistantReply),
     showSpeechUnderstood:        Boolean(source.showSpeechUnderstood        ?? defaults.showSpeechUnderstood),
-    showSpeechCorrectness:       Boolean(source.showSpeechCorrectness       ?? defaults.showSpeechCorrectness),
-    translateUserSpeechToNative: Boolean(source.translateUserSpeechToNative ?? defaults.translateUserSpeechToNative),
-    showSpeechUserTranslation:   Boolean(source.showSpeechUserTranslation   ?? defaults.showSpeechUserTranslation),
+    showSpeechCorrectness:       true,
+    translateUserSpeechToNative: true,
+    showSpeechUserTranslation:   true,
+    debugMode:                   Boolean(source.debugMode ?? defaults.debugMode),
     askTrainingLanguagePerInteraction: true
   };
 }
@@ -210,9 +220,10 @@ function readOptionsFromForm() {
     translateAssistantReply:     Boolean(elements.translateAssistantToggle.checked),
     translationTargetLanguageId: elements.translationTargetLanguageSelect.value,
     showSpeechUnderstood:        Boolean(elements.showSpeechUnderstoodToggle.checked),
-    showSpeechCorrectness:       Boolean(elements.showSpeechCorrectnessToggle.checked),
-    translateUserSpeechToNative: Boolean(elements.translateUserSpeechToggle.checked),
-    showSpeechUserTranslation:   Boolean(elements.showSpeechUserTranslationToggle.checked),
+    showSpeechCorrectness:       true,
+    translateUserSpeechToNative: true,
+    showSpeechUserTranslation:   true,
+    debugMode:                   Boolean(elements.debugModeToggle?.checked),
     askTrainingLanguagePerInteraction: true
   });
 }
@@ -226,9 +237,7 @@ function applyOptionsToForm() {
   elements.translateAssistantToggle.checked               = state.options.translateAssistantReply;
   elements.translationTargetLanguageSelect.disabled       = !state.options.translateAssistantReply;
   elements.showSpeechUnderstoodToggle.checked             = state.options.showSpeechUnderstood;
-  elements.showSpeechCorrectnessToggle.checked            = state.options.showSpeechCorrectness;
-  elements.translateUserSpeechToggle.checked              = state.options.translateUserSpeechToNative;
-  elements.showSpeechUserTranslationToggle.checked        = state.options.showSpeechUserTranslation;
+  if (elements.debugModeToggle) { elements.debugModeToggle.checked = Boolean(state.options.debugMode); }
   elements.textDifficultySelect.value                     = state.options.difficultyId;
   elements.speechDifficultySelect.value                   = state.options.difficultyId;
   elements.optionsDifficultySelect.value                  = state.options.difficultyId;
@@ -236,6 +245,9 @@ function applyOptionsToForm() {
   if (elements.appLanguageSelect) { elements.appLanguageSelect.value = state.options.appLanguageId; }
   applyTheme(state.options.themeId);
   applyUiLanguage(state.options.appLanguageId);
+  if (window.speakAI?.setDebugMode) {
+    window.speakAI.setDebugMode({ enabled: Boolean(state.options.debugMode) }).catch(() => {});
+  }
 }
 
 // ─── Populate functions ───────────────────────────────────────────────────────
@@ -288,6 +300,7 @@ function populateAppLanguageSelect() {
 }
 
 function populateSpeechVoices(trainingLanguageId) {
+  const currentValue = String(elements.speechVoiceSelect.value || "").trim();
   clearChildren(elements.speechVoiceSelect);
   const voices = state.config.voices.filter((voice) => {
     const ids = Array.isArray(voice.languageIds) ? voice.languageIds : [];
@@ -295,7 +308,11 @@ function populateSpeechVoices(trainingLanguageId) {
   });
   const list = voices.length > 0 ? voices : state.config.voices;
   list.forEach((voice) => elements.speechVoiceSelect.appendChild(createOption(voice.id, voice.label)));
-  elements.speechVoiceSelect.value = state.config.app.defaultVoiceId;
+  const defaultVoiceId = String(state.config.app.defaultVoiceId || "").trim();
+  const preferredVoiceId = [currentValue, defaultVoiceId].find((voiceId) =>
+    list.some((voice) => voice.id === voiceId)
+  );
+  elements.speechVoiceSelect.value = preferredVoiceId || String(list[0]?.id || "");
 }
 
 // Popula todos os seletores na inicialização (ou após reload de config)
@@ -309,7 +326,8 @@ function hydrateSelectors() {
   populateAppLanguageSelect();
   populateInteractionLanguageSelect(elements.textInteractionLanguageSelect);
   populateInteractionLanguageSelect(elements.speechInteractionLanguageSelect);
-  populateSpeechVoices(state.config.app.defaultLanguageId);
+  const speechInteractionLanguageId = String(elements.speechInteractionLanguageSelect.value || state.config.app.defaultLanguageId).trim();
+  populateSpeechVoices(speechInteractionLanguageId || state.config.app.defaultLanguageId);
   refreshAddTrainingLanguageSelect();
 }
 

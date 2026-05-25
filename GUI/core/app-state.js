@@ -9,7 +9,11 @@ const SIDEBAR_COLLAPSED_STORAGE_KEY = "speakai_sidebar_collapsed_v1";
 const state = {
   config: null,          // configuração carregada do backend (config.json)
   activeTab: "text",     // aba visível: "text" | "speech" | "options"
-  isBusy: false,         // bloqueia interação enquanto aguarda resposta da IA
+  isBusy: false,         // bloqueia interacao enquanto aguarda resposta da IA
+  shutdown: {
+    closeRequested: false,
+    finalizationCompleted: false
+  },
   memoryContext: "",     // resumo das conversas anteriores enviado para a IA
   memoryCount: 0,        // número de arquivos de memória salvos
   options: null,         // preferências do usuário (persistidas em localStorage)
@@ -28,8 +32,11 @@ const state = {
 
 // Cache de referências DOM — evita chamadas repetidas a getElementById
 const elements = {
+  techFxLayer:                      document.getElementById("techFxLayer"),
   layoutShell:                      document.getElementById("layoutShell"),
   sidebarToggleButton:              document.getElementById("sidebarToggleButton"),
+  sidebarBrandLogo:                 document.getElementById("sidebarBrandLogo"),
+  sidebarRepoLinkButton:            document.getElementById("sidebarRepoLinkButton"),
   memoryBadge:                      document.getElementById("memoryBadge"),
   statusBadge:                      document.getElementById("statusBadge"),
   reloadConfigButton:               document.getElementById("reloadConfigButton"),
@@ -73,8 +80,6 @@ const elements = {
   translateAssistantToggle:         document.getElementById("translateAssistantToggle"),
   translationTargetLanguageSelect:  document.getElementById("translationTargetLanguageSelect"),
   showSpeechUnderstoodToggle:       document.getElementById("showSpeechUnderstoodToggle"),
-  showSpeechCorrectnessToggle:      document.getElementById("showSpeechCorrectnessToggle"),
-  translateUserSpeechToggle:        document.getElementById("translateUserSpeechToggle"),
-  showSpeechUserTranslationToggle:  document.getElementById("showSpeechUserTranslationToggle"),
+  debugModeToggle:                  document.getElementById("debugModeToggle"),
   appLanguageSelect:                document.getElementById("appLanguageSelect")
 };

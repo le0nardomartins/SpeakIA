@@ -10,5 +10,15 @@ contextBridge.exposeInMainWorld("speakAI", {
   getApiSettings: () => ipcRenderer.invoke("speakai:get-api-settings"),
   saveApiSettings: (payload) => ipcRenderer.invoke("speakai:save-api-settings", payload),
   translateText: (payload) => ipcRenderer.invoke("speakai:translate-text", payload),
-  listConversations: () => ipcRenderer.invoke("speakai:list-conversations")
+  listConversations: () => ipcRenderer.invoke("speakai:list-conversations"),
+  openExternalUrl: (payload) => ipcRenderer.invoke("speakai:open-external-url", payload),
+  setDebugMode: (payload) => ipcRenderer.invoke("speakai:set-debug-mode", payload),
+  debugLog: (payload) => ipcRenderer.send("speakai:debug-log", payload),
+  onAppCloseRequested: (callback) => {
+    if (typeof callback !== "function") {
+      return;
+    }
+    ipcRenderer.on("speakai:app-close-requested", callback);
+  },
+  sendAppCloseResponse: (payload) => ipcRenderer.send("speakai:app-close-response", payload)
 });

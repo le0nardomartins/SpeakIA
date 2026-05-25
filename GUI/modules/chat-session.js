@@ -41,6 +41,44 @@ function removeTypingIndicator(container) {
   if (existing) { existing.remove(); }
 }
 
+function emitDebugLog(indicator, data) {
+  if (!window.speakAI?.debugLog) {
+    return;
+  }
+  try {
+    window.speakAI.debugLog({ indicator, data });
+  } catch {}
+}
+
+function syncAssistantAudio(audioDataUrl, shouldAutoplay) {
+  const audio = elements.speechAudioPlayer;
+  if (!audio || !audioDataUrl) {
+    return;
+  }
+
+  audio.pause();
+  audio.src = audioDataUrl;
+  audio.currentTime = 0;
+  audio.load();
+
+  if (!shouldAutoplay) {
+    return;
+  }
+
+  const playPromise = audio.play();
+  if (playPromise?.catch) {
+    playPromise.catch((error) => {
+      emitDebugLog("AUDIO_AUTOPLAY_RETRY", { message: error?.message || String(error) });
+      const tryAgain = () => {
+        audio.play().catch((retryError) => {
+          emitDebugLog("AUDIO_AUTOPLAY_FAILED", { message: retryError?.message || String(retryError) });
+        });
+      };
+      audio.addEventListener("canplay", tryAgain, { once: true });
+    });
+  }
+}
+
 // ─── Mensagens de chat ────────────────────────────────────────────────────────
 
 // Exibe uma dica centralizada quando o chat está vazio
@@ -227,21 +265,25 @@ function renderCorrectionBox(box, correction, emptyText) {
 function renderSpeechFeedback(feedback) {
   if (!feedback) {
     elements.speechFeedbackBox.innerHTML = `<p class="placeholder">Feedback de fala será exibido aqui.</p>`;
+    emitDebugLog("SPEECH_FEEDBACK_EMPTY", "");
     return;
   }
   const lines = [];
   if (state.options.showSpeechUnderstood)
     lines.push(`<p><strong>IA entendeu:</strong> ${escapeHtml(feedback.understoodText || "-")}</p>`);
-  if (state.options.showSpeechCorrectness) {
-    lines.push(`<p><strong>Avaliação:</strong> ${escapeHtml(feedback.correctnessMessage || "-")}</p>`);
-    lines.push(`<p><strong>Sugestão:</strong> ${escapeHtml(feedback.suggestedText || "-")}</p>`);
-  }
-  if (state.options.showSpeechUserTranslation && feedback.translatedUserText)
-    lines.push(`<p><strong>Tradução da sua fala:</strong> ${escapeHtml(feedback.translatedUserText)}</p>`);
+  lines.push(`<p><strong>Avaliação:</strong> ${escapeHtml(feedback.correctnessMessage || "-")}</p>`);
+  lines.push(`<p><strong>Sugestão:</strong> ${escapeHtml(feedback.suggestedText || "-")}</p>`);
+  lines.push(`<p><strong>Tradução da sua fala:</strong> ${escapeHtml(feedback.translatedUserText || "-")}</p>`);
   if (lines.length === 0)
     lines.push(`<p class="placeholder">Feedback oculto pelas opções atuais.</p>`);
 
   elements.speechFeedbackBox.innerHTML = lines.join("");
+  emitDebugLog("SPEECH_FEEDBACK", {
+    understoodText: feedback.understoodText || "",
+    correctnessMessage: feedback.correctnessMessage || "",
+    suggestedText: feedback.suggestedText || "",
+    translatedUserText: feedback.translatedUserText || ""
+  });
 }
 
 // Atualiza o botão e label do microfone conforme estado de gravação
@@ -267,7 +309,7 @@ function getCommonPayload(sessionType, interactionLanguageId, difficultyId, hist
     translateAssistantReply:     state.options.translateAssistantReply,
     translationTargetLanguageId: state.options.translationTargetLanguageId,
     nativeLanguageId:            state.options.nativeLanguageId,
-    translateUserSpeechToNative: state.options.translateUserSpeechToNative,
+    translateUserSpeechToNative: true,
     alwaysTrainingLanguageIds:   state.options.alwaysTrainingLanguageIds,
     text:                        userText,
     history,
@@ -291,6 +333,12 @@ async function runSessionTurn({ sessionKey, userText, interactionLanguageId, dif
   const session      = state.sessions[sessionKey];
   const safeUserText = String(userText || "").trim();
   if (!safeUserText) { return; }
+  emitDebugLog("USER_INPUT", {
+    sessionType,
+    interactionLanguageId,
+    difficultyId,
+    text: safeUserText
+  });
 
   session.history.push({ role: "user", text: safeUserText });
   const userMsgWrapper = addChatMessage(chatContainer, "user", safeUserText);
@@ -302,7 +350,9 @@ async function runSessionTurn({ sessionKey, userText, interactionLanguageId, dif
   setStatus(tr("statusProcessing"), "ok");
 
   try {
-    const result        = await window.speakAI.processTurn(getCommonPayload(sessionType, interactionLanguageId, difficultyId, session.history, safeUserText));
+    emitDebugLog("TURN_DISPATCH", { sessionType, historyItems: session.history.length });
+    const priorHistory  = session.history.slice(0, -1);
+    const result        = await window.speakAI.processTurn(getCommonPayload(sessionType, interactionLanguageId, difficultyId, priorHistory, safeUserText));
     removeTypingIndicator(chatContainer);
 
     const assistantText = String(result?.assistantText || "").trim();
@@ -311,6 +361,11 @@ async function runSessionTurn({ sessionKey, userText, interactionLanguageId, dif
     const translatedAssistantText = String(result?.translatedAssistantText || "").trim();
     session.history.push({ role: "assistant", text: assistantText });
     addChatMessage(chatContainer, "assistant", assistantText, translatedAssistantText, true);
+    emitDebugLog("ASSISTANT_REPLY", {
+      sessionType,
+      assistantText,
+      translatedAssistantText
+    });
 
     // correction=null means AI found no errors; distinguish from pre-turn placeholder
     const corrEmptyText = result.correction === null ? tr("correctionNone") : tr("correctionPlaceholder");
@@ -319,20 +374,20 @@ async function runSessionTurn({ sessionKey, userText, interactionLanguageId, dif
     // Add correction icon to user's message bubble if there are errors
     if (userMsgWrapper && result.correction) {
       addUserCorrectionIcon(userMsgWrapper, result.correction);
+      emitDebugLog("GRAMMAR_CORRECTION", result.correction);
     }
 
     if (sessionType === "speech") {
       renderSpeechFeedback(result?.speechDiagnostics || null);
-      if (result?.audioDataUrl && state.config.ui?.autoPlayAssistantAudio) {
-        elements.speechAudioPlayer.src = result.audioDataUrl;
-        const p = elements.speechAudioPlayer.play();
-        if (p?.catch) { p.catch(() => {}); }
-      }
+    }
+    if (result?.audioDataUrl) {
+      syncAssistantAudio(result.audioDataUrl, Boolean(state.config.ui?.autoPlayAssistantAudio));
     }
     setStatus("Resposta gerada", "ok");
   } catch (error) {
     removeTypingIndicator(chatContainer);
     addChatMessage(chatContainer, "error", `Erro: ${error.message}`);
+    emitDebugLog("TURN_ERROR", { sessionType, message: error.message });
     setStatus("Erro na interação", "error");
   } finally {
     setBusy(false);
@@ -356,6 +411,7 @@ async function handleSpeechRecordingToggle() {
 
   if (state.speechRecording.active) {
     state.speechRecording.active = false;
+    emitDebugLog("MIC_STOP_REQUESTED", "");
     setSpeechRecordButtonState(false);
     setBusy(true);
     try {
@@ -368,6 +424,7 @@ async function handleSpeechRecordingToggle() {
             const transcriptResult = await window.speakAI.transcribeAudio({ audioBuffer: arrayBuffer, mimeType: blob.type, languageId: interactionLanguageId });
             const transcript   = String(transcriptResult?.text || "").trim();
             if (!transcript) { throw new Error("Transcrição vazia"); }
+            emitDebugLog("USER_SPEECH_TRANSCRIPT", { transcript, interactionLanguageId });
 
             if (state.options.showSpeechUnderstood) {
               addChatMessage(elements.speechChatMessages, "info", `IA entendeu da sua fala: ${transcript}`);
@@ -409,6 +466,7 @@ async function handleSpeechRecordingToggle() {
 
     state.speechRecording.recorder.start();
     state.speechRecording.active = true;
+    emitDebugLog("MIC_RECORDING_STARTED", { interactionLanguageId });
     setSpeechRecordButtonState(true);
     setStatus("Gravando...", "ok");
   } catch (error) {

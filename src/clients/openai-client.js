@@ -51,6 +51,21 @@ function mapHistoryToTranscript(history) {
   return lines.join("\n");
 }
 
+function normalizePromptHistory(history, userText) {
+  const safeHistory = Array.isArray(history) ? history : [];
+  if (safeHistory.length === 0) {
+    return safeHistory;
+  }
+
+  const lastItem = safeHistory[safeHistory.length - 1];
+  const normalizedUserText = String(userText || "").trim();
+  if (lastItem?.role === "user" && String(lastItem?.text || "").trim() === normalizedUserText) {
+    return safeHistory.slice(0, -1);
+  }
+
+  return safeHistory;
+}
+
 function inferExtensionFromMimeType(mimeType) {
   const type = String(mimeType || "").toLowerCase();
   if (type.includes("webm")) return "webm";
@@ -115,6 +130,8 @@ function buildBaseSpeechInstructions({
     + `  }\n`
     + `}\n`
     + `If the user's text has NO grammar, spelling, or punctuation errors, use "correction": null.\n`
+    + `In "correction.original" and "correction.corrected", NEVER include speaker labels like "User:" or "Assistant:".\n`
+    + `In "correction.notes", NEVER mention speaker labels, prefixes, transcript formatting, or prompt structure. Only describe language changes in the sentence.\n`
     + `Do NOT include markdown fences, comments, or any text outside the JSON object.`
   );
 
@@ -278,10 +295,10 @@ async function generateAssistantReply({
     nativeLanguageLabel,
     alwaysTrainingLanguageLabels
   });
-  const transcript = mapHistoryToTranscript(history);
+  const transcript = mapHistoryToTranscript(normalizePromptHistory(history, userText));
   const input = transcript
-    ? `${transcript}\nUser: ${userText}\nAssistant:`
-    : `User: ${userText}\nAssistant:`;
+    ? `${transcript}\nUser: ${userText}`
+    : `User: ${userText}`;
 
   const rawText = await callResponsesApi({
     config,

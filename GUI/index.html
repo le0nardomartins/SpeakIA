@@ -13,12 +13,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" />
   </head>
   <body>
-    <div id="layoutShell" class="layout-shell">
-      <aside class="sidebar">
+    <div id="techFxLayer" class="o-tech-fx-layer" aria-hidden="true"></div>
+    <div id="layoutShell" class="layout-shell o-tech-layout">
+      <aside class="sidebar o-tech-surface">
         <div class="sidebar-top">
           <div class="sidebar-top-spacer"></div>
           <div class="sidebar-brand">
-            <img src="../assets/without_background/logo_sem_fundo.png" alt="SpeakAI" class="sidebar-brand-logo" />
+            <img id="sidebarBrandLogo" src="../assets/without_background/logo_sem_fundo.png" alt="SpeakAI" class="sidebar-brand-logo" />
           </div>
           <button id="sidebarToggleButton" class="icon-action ghost" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
@@ -46,6 +47,12 @@
           </button>
         </nav>
 
+        <div class="sidebar-repo-link-wrap">
+          <button id="sidebarRepoLinkButton" class="sidebar-repo-link-btn" type="button">
+            Github Repository and Docs
+          </button>
+        </div>
+
         <div class="sidebar-footer">
           <span id="memoryBadge" class="memory-badge">Memórias: 0</span>
           <span id="statusBadge" class="status-badge">Pronto</span>
@@ -53,7 +60,7 @@
       </aside>
 
       <main class="workspace">
-        <section id="tab-text" class="tab-panel is-active">
+        <section id="tab-text" class="tab-panel o-tech-panel is-active">
           <div class="panel-header">
             <h2 data-i18n="panelGrammar">Treino Gramatical (Texto)</h2>
             <div class="panel-header-actions">
@@ -90,7 +97,7 @@
           </div>
         </section>
 
-        <section id="tab-speech" class="tab-panel">
+        <section id="tab-speech" class="tab-panel o-tech-panel">
           <div class="panel-header">
             <h2 data-i18n="panelSpeech">Conversação</h2>
             <div class="panel-header-actions">
@@ -149,7 +156,7 @@
           </div>
         </section>
 
-        <section id="tab-options" class="tab-panel tab-options">
+        <section id="tab-options" class="tab-panel o-tech-panel tab-options">
           <div class="panel-header">
             <h2 data-i18n="panelOptions">Opções</h2>
             <div class="panel-header-actions">
@@ -251,16 +258,8 @@
                   <input id="showSpeechUnderstoodToggle" type="checkbox" />
                 </label>
                 <label class="field field-switch compact">
-                  <span data-i18n="labelShowCorrectness">Mostrar correção da fala</span>
-                  <input id="showSpeechCorrectnessToggle" type="checkbox" />
-                </label>
-                <label class="field field-switch compact">
-                  <span data-i18n="labelTranslateUserSpeech">Traduzir fala do usuário</span>
-                  <input id="translateUserSpeechToggle" type="checkbox" />
-                </label>
-                <label class="field field-switch compact">
-                  <span data-i18n="labelShowTranslation">Mostrar tradução da fala</span>
-                  <input id="showSpeechUserTranslationToggle" type="checkbox" />
+                  <span data-i18n="labelDebugMode">Modo debug (mostrar terminal)</span>
+                  <input id="debugModeToggle" type="checkbox" />
                 </label>
               </div>
             </div>

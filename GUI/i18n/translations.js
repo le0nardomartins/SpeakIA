@@ -35,6 +35,7 @@ const TRANSLATIONS = {
     labelShowCorrectness: "Show speech correction",
     labelTranslateUserSpeech: "Translate user speech",
     labelShowTranslation: "Show speech translation",
+    labelDebugMode: "Debug mode (show terminal)",
     btnSave: "Save",
     statusReady: "Ready",
     statusLoading: "Loading...",
